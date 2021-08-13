@@ -15,7 +15,6 @@ import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class BoxDrawingView extends View {
     private static final String TAG = "BoxDrawingView";
@@ -36,10 +35,10 @@ public class BoxDrawingView extends View {
         super(context, attrs);
 
         mBoxPaint = new Paint();
-        mBoxPaint.setColor(0x22ff0000);
+        mBoxPaint.setColor(0x446200EE);
 
         mBackgroundPaint = new Paint();
-        mBackgroundPaint.setColor(0xffffffff);
+        mBackgroundPaint.setColor(0xFFEADAFC);
     }
 
     @Override
