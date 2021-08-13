@@ -41,6 +41,11 @@ public class BoxDrawingView extends View {
         mBackgroundPaint.setColor(0xFFEADAFC);
     }
 
+    public void clear() {
+        mBoxen.clear();
+        invalidate();
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         canvas.drawPaint(mBackgroundPaint);
