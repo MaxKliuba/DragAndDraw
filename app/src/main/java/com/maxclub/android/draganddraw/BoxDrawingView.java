@@ -4,16 +4,24 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PointF;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
+import androidx.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class BoxDrawingView extends View {
     private static final String TAG = "BoxDrawingView";
+
+    private static final String KEY_SAVE_INSTANCE_STATE = "SaveInstanceState";
+    private static final String KEY_BOXEN = "Boxen";
 
     private Box mCurrentBox;
     private List<Box> mBoxen = new ArrayList<>();
@@ -31,7 +39,7 @@ public class BoxDrawingView extends View {
         mBoxPaint.setColor(0x22ff0000);
 
         mBackgroundPaint = new Paint();
-        mBackgroundPaint.setColor(0xfff8efe0);
+        mBackgroundPaint.setColor(0xffffffff);
     }
 
     @Override
@@ -79,5 +87,29 @@ public class BoxDrawingView extends View {
         Log.i(TAG, action + " at x=" + current.x + ", y=" + current.y);
 
         return true;
+    }
+
+    @Nullable
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        Log.i(TAG, "onSaveInstanceState");
+
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(KEY_SAVE_INSTANCE_STATE, super.onSaveInstanceState());
+        bundle.putParcelableArrayList(KEY_BOXEN, (ArrayList<? extends Parcelable>) mBoxen);
+
+        return bundle;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        Log.i(TAG, "onRestoreInstanceState");
+
+        if (state instanceof Bundle) {
+            Bundle bundle = (Bundle) state;
+            state = bundle.getParcelable(KEY_SAVE_INSTANCE_STATE);
+            mBoxen = bundle.getParcelableArrayList(KEY_BOXEN);
+        }
+        super.onRestoreInstanceState(state);
     }
 }
