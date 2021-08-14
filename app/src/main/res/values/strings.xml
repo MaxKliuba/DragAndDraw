@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">DragAndDraw</string>
+    <string name="undo_menu_item">Undo</string>
     <string name="clear_menu_item">Clear</string>
 </resources>

@@ -2,8 +2,11 @@ package com.maxclub.android.draganddraw;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.PointF;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.util.AttributeSet;
@@ -26,6 +29,10 @@ public class BoxDrawingView extends View {
     private List<Box> mBoxen = new ArrayList<>();
     private Paint mBoxPaint;
     private Paint mBackgroundPaint;
+    private RectF mRect;
+    private Path mPathRect;
+    private Matrix mMatrix;
+    private float mStartRotationDegree;
 
     public BoxDrawingView(Context context) {
         this(context, null);
@@ -35,10 +42,14 @@ public class BoxDrawingView extends View {
         super(context, attrs);
 
         mBoxPaint = new Paint();
-        mBoxPaint.setColor(0x446200EE);
+        mBoxPaint.setColor(0x556200EE);
 
         mBackgroundPaint = new Paint();
-        mBackgroundPaint.setColor(0xFFEADAFC);
+        mBackgroundPaint.setColor(0xFFF1E7FC);
+
+        mRect = new RectF();
+        mPathRect = new Path();
+        mMatrix = new Matrix();
     }
 
     public void clear() {
@@ -46,51 +57,80 @@ public class BoxDrawingView extends View {
         invalidate();
     }
 
+    public void undo() {
+        if (isUndoEnable()) {
+            mBoxen.remove(mBoxen.size() - 1);
+            invalidate();
+        }
+    }
+
+    public boolean isUndoEnable() {
+        return !mBoxen.isEmpty();
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         canvas.drawPaint(mBackgroundPaint);
 
         for (Box box : mBoxen) {
-            float left = Math.min(box.getOrigin().x, box.getCurrent().x);
-            float right = Math.max(box.getOrigin().x, box.getCurrent().x);
-            float top = Math.min(box.getOrigin().y, box.getCurrent().y);
-            float bottom = Math.max(box.getOrigin().y, box.getCurrent().y);
+            mRect.left = Math.min(box.getOrigin().x, box.getCurrent().x);
+            mRect.right = Math.max(box.getOrigin().x, box.getCurrent().x);
+            mRect.top = Math.min(box.getOrigin().y, box.getCurrent().y);
+            mRect.bottom = Math.max(box.getOrigin().y, box.getCurrent().y);
 
-            canvas.drawRect(left, top, right, bottom, mBoxPaint);
+            mPathRect.reset();
+            mPathRect.addRect(mRect, Path.Direction.CW);
+
+            mMatrix.reset();
+            mMatrix.setRotate(box.getRotationDegree(), mRect.centerX(), mRect.centerY());
+            mPathRect.transform(mMatrix);
+
+            canvas.drawPath(mPathRect, mBoxPaint);
         }
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         PointF current = new PointF(event.getX(), event.getY());
-        String action = "";
 
-        switch (event.getAction()) {
+        int actionMask = event.getActionMasked();
+        int pointerCount = event.getPointerCount();
+
+        switch (actionMask) {
             case MotionEvent.ACTION_DOWN:
-                action = "ACTION_DOWN";
                 mCurrentBox = new Box(current);
                 mBoxen.add(mCurrentBox);
                 break;
+            case MotionEvent.ACTION_POINTER_DOWN:
+                mStartRotationDegree = getDegreeBetweenPointers(event);
+                break;
             case MotionEvent.ACTION_MOVE:
-                action = "ACTION_MOVE";
                 if (mCurrentBox != null) {
-                    mCurrentBox.setCurrent(current);
+                    if (pointerCount == 1) {
+                        mCurrentBox.setCurrent(current);
+                    } else if (pointerCount == 2) {
+                        float currentAngleDegree = getDegreeBetweenPointers(event);
+                        mCurrentBox.setRotationDegree(currentAngleDegree - mStartRotationDegree);
+                    }
                     invalidate();
                 }
                 break;
             case MotionEvent.ACTION_UP:
-                action = "ACTION_UP";
-                mCurrentBox = null;
-                break;
+            case MotionEvent.ACTION_POINTER_UP:
             case MotionEvent.ACTION_CANCEL:
-                action = "ACTION_CANCEL";
                 mCurrentBox = null;
                 break;
         }
 
-        Log.i(TAG, action + " at x=" + current.x + ", y=" + current.y);
-
         return true;
+    }
+
+    private float getDegreeBetweenPointers(MotionEvent event) {
+        float deltaX = (event.getX(0) - event.getX(1));
+        float deltaY = (event.getY(0) - event.getY(1));
+        double radians = Math.atan2(deltaY, deltaX);
+
+        return (float) Math.toDegrees(radians);
     }
 
     @Nullable

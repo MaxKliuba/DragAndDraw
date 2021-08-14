@@ -7,10 +7,12 @@ import android.os.Parcelable;
 public class Box implements Parcelable {
     private PointF mOrigin;
     private PointF mCurrent;
+    private float mRotationDegree;
 
     public Box(PointF origin) {
         mOrigin = origin;
         mCurrent = origin;
+        mRotationDegree = 0;
     }
 
     public PointF getOrigin() {
@@ -23,6 +25,14 @@ public class Box implements Parcelable {
 
     public void setCurrent(PointF current) {
         mCurrent = current;
+    }
+
+    public float getRotationDegree() {
+        return mRotationDegree;
+    }
+
+    public void setRotationDegree(float rotationDegree) {
+        mRotationDegree = rotationDegree;
     }
 
     public static final Parcelable.Creator<Box> CREATOR = new Parcelable.Creator<Box>() {
@@ -38,6 +48,7 @@ public class Box implements Parcelable {
     private Box(Parcel in) {
         mOrigin = (PointF) in.readValue(ClassLoader.getSystemClassLoader());
         mCurrent = (PointF) in.readValue(ClassLoader.getSystemClassLoader());
+        mRotationDegree = (float) in.readValue(ClassLoader.getSystemClassLoader());
     }
 
     @Override
@@ -49,5 +60,6 @@ public class Box implements Parcelable {
     public void writeToParcel(Parcel dest, int flags) {
         dest.writeValue(mOrigin);
         dest.writeValue(mCurrent);
+        dest.writeValue(mRotationDegree);
     }
 }

@@ -3,7 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/clear_screen"
+        android:id="@+id/undo_item"
+        android:icon="@drawable/ic_baseline_undo_24"
+        android:title="@string/undo_menu_item"
+        app:showAsAction="ifRoom|withText" />
+
+    <item
+        android:id="@+id/clear_screen_item"
         android:icon="@drawable/ic_baseline_cleaning_services_24"
         android:title="@string/clear_menu_item"
         app:showAsAction="ifRoom|withText" />

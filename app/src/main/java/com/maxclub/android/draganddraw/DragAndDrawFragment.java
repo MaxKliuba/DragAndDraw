@@ -7,6 +7,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -38,6 +39,12 @@ public class DragAndDrawFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_drag_and_draw, container, false);
 
         mBoxDrawingView = (BoxDrawingView) v.findViewById(R.id.box_drawing_view);
+        mBoxDrawingView.getViewTreeObserver().addOnDrawListener(new ViewTreeObserver.OnDrawListener() {
+            @Override
+            public void onDraw() {
+                getActivity().invalidateOptionsMenu();
+            }
+        });
 
         return v;
     }
@@ -46,12 +53,18 @@ public class DragAndDrawFragment extends Fragment {
     public void onCreateOptionsMenu(@NonNull @NotNull Menu menu, @NonNull @NotNull MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
         inflater.inflate(R.menu.fragment_drag_and_draw_menu, menu);
+
+        MenuItem undoItem = menu.findItem(R.id.undo_item);
+        undoItem.setVisible(mBoxDrawingView.isUndoEnable());
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull @NotNull MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.clear_screen:
+            case R.id.undo_item:
+                mBoxDrawingView.undo();
+                return true;
+            case R.id.clear_screen_item:
                 mBoxDrawingView.clear();
                 return true;
             default:
